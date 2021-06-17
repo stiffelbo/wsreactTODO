@@ -17,6 +17,10 @@ class App extends React.Component {
     this.socket.on('removeTask', (id) => this.removeTask(id));
     //add new task
     this.socket.on('addTask', (task) => this.addTask(task));
+    //change task
+    this.socket.on('changeTask', (changedTask) => {      
+      this.changeTask(changedTask.id, changedTask.name);
+    });
   }
 
   updateTasks(newTasks) {
@@ -35,6 +39,7 @@ class App extends React.Component {
     this.setState({
       tasks: this.state.tasks.filter(val => val.id !== taskId),
     });
+    console.log(this.state.tasks);
     //task name works as filter to avoid infinity loop on sockets, it is only passed from component but not from server so socket emits only form user that removes task.
     if(taskName) this.socket.emit('removeTask', taskId);
   }
@@ -50,10 +55,29 @@ class App extends React.Component {
     this.setState({newTask: ''});
   }
 
+  changeTask(taskId, newName, emit=false){  
+      
+    this.setState({      
+      tasks: this.state.tasks.map(val => {
+        if(val.id === taskId){
+          val.name = newName;
+          console.log(val.id, taskId, newName, val);
+        }
+        return val;
+      })
+    });
+           
+    if(emit) {
+      this.socket.emit('changeTask', taskId, newName);      
+    };
+  }
+
   
   render() {
-    const {tasks, newTask} = this.state;
+    const {newTask} = this.state;
+    console.log(this.state.tasks[0]);
     return (
+
       <div className="App">
     
         <header>
@@ -64,9 +88,11 @@ class App extends React.Component {
           <h2>Tasks</h2>
     
           <ul className="tasks-section__list" id="tasks-list">
-            {tasks.map(task => (
+            {this.state.tasks.map(task => (              
               <li key={task.id} className='task'>
-                {task.name}
+                <input type="text" className='task_input' value={task.name} onChange={e => {
+                  const newName = e.currentTarget.value;
+                  this.changeTask(task.id, newName, true)}}></input>                
                 <button className="btn btn--red" onClick={() => this.removeTask(task.id, task.name)}>Remove</button>
               </li>
             ))}

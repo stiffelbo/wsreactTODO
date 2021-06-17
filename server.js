@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const uuid = require('uuid');
 const socket = require('socket.io');
 
 const app = express();
@@ -26,6 +25,15 @@ const removeTask = (taskId) =>{
   tasks = tasks.filter(task => task.id !== taskId);
 }
 
+const changeTask = (id, newName) => {
+  tasks.forEach(val => {
+    if(val.id === id){
+      val.name = newName;
+      console.log('update value: ', newName, "task: ", id);
+    }
+  });
+}
+
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '/client')));
 
@@ -46,6 +54,11 @@ io.on('connection', (socket) => {
   socket.on('removeTask', (id) => {     
     removeTask(id);
     socket.broadcast.emit('removeTask', id);
+  });
+  socket.on('changeTask', (taskId, newName) => {     
+    changeTask(taskId, newName);
+    const changedTask = {id: taskId, name: newName}    
+    socket.broadcast.emit('changeTask', changedTask);
   });
   socket.on('disconnect', () => { 
     const id = socket.id;

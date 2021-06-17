@@ -73,3 +73,18 @@ p {
   align-items: center;
   border-bottom: 1px dashed rgb(83, 83, 83);
 }
+
+.task .task_input{
+  background: none;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 8px 25px 8px 5px;
+  font-family: inherit;
+  outline: none;
+}
+
+.task .task_input:focus{
+  border-bottom: 2px solid #0064e7;
+}
